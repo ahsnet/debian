@@ -1,0 +1,164 @@
+#!/bin/bash
+myip=`curl icanhazip.com`;
+
+flag=0
+
+echo
+
+function create_user() {
+	useradd -M $uname
+	echo "$uname:$pass" | chpasswd
+	usermod -e $expdate $uname
+
+	myip=`curl icanhazip.com`;
+	myip2="s/xxxxxxxxx/$myip/g";	
+	wget -qO /tmp/client.ovpn "https://raw.githubusercontent.com/adammau2/auto-debian7/master/conf/1194-client.conf"
+	sed -i 's/remote xxxxxxxxx 1194/remote xxxxxxxxx 443/g' /tmp/client.ovpn
+	sed -i $myip2 /tmp/client.ovpn
+	echo ""
+	echo "OpenVPN  : TCP 443 (client config : http://$myip:81/client.tar)"
+}
+
+function renew_user() {
+	echo "New expiration date for $uname: $expdate...";
+	usermod -e $expdate $uname
+}
+
+function delete_user(){
+	userdel $uname
+}
+
+function expired_users(){
+	cat /etc/shadow | cut -d: -f1,8 | sed /:$/d > /tmp/expirelist.txt
+	totalaccounts=`cat /tmp/expirelist.txt | wc -l`
+	for((i=1; i<=$totalaccounts; i++ )); do
+		tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
+		username=`echo $tuserval | cut -f1 -d:`
+		userexp=`echo $tuserval | cut -f2 -d:`
+		userexpireinseconds=$(( $userexp * 86400 ))
+		todaystime=`date +%s`
+		if [ $userexpireinseconds -lt $todaystime ] ; then
+			echo $username
+		fi
+	done
+	rm /tmp/expirelist.txt
+}
+
+function not_expired_users(){
+    cat /etc/shadow | cut -d: -f1,8 | sed /:$/d > /tmp/expirelist.txt
+    totalaccounts=`cat /tmp/expirelist.txt | wc -l`
+    for((i=1; i<=$totalaccounts; i++ )); do
+        tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
+        username=`echo $tuserval | cut -f1 -d:`
+        userexp=`echo $tuserval | cut -f2 -d:`
+        userexpireinseconds=$(( $userexp * 86400 ))
+        todaystime=`date +%s`
+        if [ $userexpireinseconds -gt $todaystime ] ; then
+            echo $username
+        fi
+    done
+	rm /tmp/expirelist.txt
+}
+
+function used_data(){
+	myip=`curl icanhazip.com`
+	myint=`ifconfig | grep -B1 "inet addr:$myip" | head -n1 | awk '{print $1}'`
+	ifconfig $myint | grep "RX bytes" | sed -e 's/ *RX [a-z:0-9]*/Received: /g' | sed -e 's/TX [a-z:0-9]*/\nTransfered: /g'
+}
+
+clear
+echo "Testing
+
+For support:-
+Email: biossh10@gmail.com
+My Facebook: https://www.facebook.com/adammau2
+Telegram : @adammau2
+SMS/Telegram/Whatsapp: +6289639714655
+
+";
+PS3='Please enter your choice: '
+options=("Add User" "Renew User" "Delete User" "User List" "Users Not Expired" "Expired Users" "Restart Server" "Change Password" "Used Data By Users" "Ram Status" "Monitor Multi Login" "Change OpenVPN Port" "Change Dropbear Port" "Change Squid3 Port" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Add User")
+            read -p "Enter username: " uname
+            read -p "Enter password: " pass
+            read -p "Enter expiry date (YYYY-MM-DD): " expdate
+	    create_user
+	    break
+            ;;
+        "Renew User")
+            read -p "Enter username to renew: " uname
+            read -p "Enter expiry date (YYYY-MM-DD): " expdate
+            renew_user
+            break
+            ;;
+        "Delete User")
+            read -p "Enter username to be removed: " uname
+            delete_user
+            break
+            ;;		
+		"User List")
+            user-list
+            break
+            ;;
+		"Users Not Expired")
+			not_expired_users
+			break
+			;;
+		"Expired Users")
+			expired_users
+			break
+			;;		
+		"Restart Server")
+			reboot
+			break
+			;;	
+		"Change Password")
+			passwd
+			break
+			;;
+		"Used Data By Users")
+			used_data
+			break
+			;;
+		"Ram Status")
+		    free -h | grep -v + > /tmp/ramcache
+            cat /tmp/ramcache | grep -v "Swap"
+            break
+              ;;
+       "Monitor Multi Login")
+               monssh
+                break
+	          ;;
+		"Change OpenVPN Port")	
+            echo "What OpenVPN port would you like  to change to?"
+            read -p "Port: " -e -i 1194 PORT
+            sed -i "s/port [0-9]*/port $PORT/" /etc/openvpn/1194.conf
+            service openvpn restart
+            echo "OpenVPN Updated : Port $PORT"
+			break
+			;;
+		"Change Dropbear Port")	
+            echo "What Dropbear port would you like to change to?"
+            read -p "Port: " -e -i 443 PORT
+            sed -i "s/DROPBEAR_PORT=[0-9]*/DROPBEAR_PORT=$PORT/" /etc/default/dropbear
+            service dropbear restart
+            echo "Dropbear Updated : Port $PORT"
+			break
+			;;
+        "Change Squid3 Port")	
+            echo "What Squid3 port would you like to change to?"
+            read -p "Port: " -e -i 8080 PORT
+            sed -i "s/http_port [0-9]*/http_port $PORT/" /etc/squid3/squid.conf
+            service squid3 restart
+            echo "echo "Squid3 Updated : Port $PORT""
+			break
+			;;			
+        "Quit")
+            break
+            ;;
+        *) echo invalid option;;
+    esac
+done
