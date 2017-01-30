@@ -12,7 +12,7 @@ apt-get update
 apt-get -y install wget curl
 
 # Change to Time GMT+8
-ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
+ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 
 # set locale
 sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
@@ -73,7 +73,7 @@ service nginx restart
 wget -O /etc/openvpn/openvpn.tar "https://raw.githubusercontent.com/adammau2/auto-debian7/master/conf/openvpn.tar"
 cd /etc/openvpn/
 tar xf openvpn.tar
-wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/adammau2/auto-debian7/master/conf/1194-debian.conf"
+wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/adammau2/auto-debian7/master/conf/1194-client.conf"
 service openvpn restart
 sysctl -w net.ipv4.ip_forward=1
 sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
