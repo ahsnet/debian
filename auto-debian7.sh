@@ -124,7 +124,7 @@ sed -i "s/\$iface_list = array('eth0', 'sixxs');/\$iface_list = array('eth0');/g
 sed -i "s/\$language = 'nl';/\$language = 'en';/g" config.php
 sed -i 's/Internal/Internet/g' config.php
 sed -i '/SixXS IPv6/d' config.php
-sed -i "s/\$locale = 'en_US.UTF-7';/\$locale = 'en_US.UTF+7';/g" config.php
+sed -i "s/\$locale = 'en_US.UTF-8';/\$locale = 'en_US.UTF+8';/g" config.php
 cd
 
 # install fail2ban
