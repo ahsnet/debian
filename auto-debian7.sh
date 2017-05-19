@@ -11,7 +11,7 @@ sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
 apt-get update
 apt-get -y install wget curl
 
-# Change to Time GMT+8
+# Change to Time GMT+7
 ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 
 # set locale
@@ -25,7 +25,7 @@ apt-get -y --purge remove sendmail*;
 apt-get -y --purge remove bind9*;
 
 # update
-apt-get update 
+apt-get -y update 
 apt-get -y upgrade
 
 # install webserver
@@ -169,7 +169,9 @@ bash autokick.sh
 
 # Install Monitor
 cd
-wget https://raw.githubusercontent.com/adammau2/auto-debian7/master/app/monssh; mv monssh /usr/local/bin/; chmod +x /usr/local/bin/monssh
+wget https://raw.githubusercontent.com/adammau2/auto-debian7/master/app/monssh
+mv monssh /usr/local/bin/
+chmod +x /usr/local/bin/monssh
 
 
 # Install Menu
@@ -180,7 +182,7 @@ chmod +x /usr/local/bin/menu
 
 # moth
 cd
-wget wget https://raw.githubusercontent.com/adammau2/auto-debian7/master/app/motd
+wget https://raw.githubusercontent.com/adammau2/auto-debian7/master/app/motd
 mv ./motd /etc/motd
 
 # Restart Service
