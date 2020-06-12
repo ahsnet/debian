@@ -4,7 +4,7 @@
 cd
 
 # download userlimit
-wget https://raw.githubusercontent.com/adammau2/auto-debian7/master/userlimit.sh
+wget https://raw.githubusercontent.com/ahsnet/debian/master/userlimit.sh
 chmod +x userlimit.sh
 
 # setup cron for userlimit
